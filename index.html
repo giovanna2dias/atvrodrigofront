@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      form {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      table,
+      tr,
+      td,
+      th {
+        border-collapse: collapse;
+        border: 2px solid green;
+        padding: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <form>
+      <input
+        type="text"
+        id="nome_prod"
+        placeholder="Nome do produto"
+        required
+      />
+      <input type="text" id="codigo" placeholder="codigo" required />
+      <input type="number" id="preco" placeholder="preço" required />
+      <input type="number" id="quantidade" placeholder="quantidade" required />
+      <input type="text" id="cor" placeholder="cor" />
+      <input type="text" id="capac" placeholder="capacidade de armazenamento" />
+      <textarea
+        name=""
+        id="espec"
+        placeholder="especificações técnicas"
+      ></textarea>
+      <input
+        type="number"
+        id="quantidade_min"
+        placeholder="quantidade minima"
+        required
+      />
+      <select name="" id="id_fabric" required>
+        
+      </select>
+      <button>Cadastrar Produto</button>
+    </form>
+    <table>
+      <thead>
+        <tr>
+          <th>Id</th>
+          <th>Nome</th>
+          <th>Código</th>
+          <th>Preço</th>
+          <th>quantidade</th>
+          <th>Cor</th>
+          <th>capacidade</th>
+          <th>especificações</th>
+          <th>quantidade minima</th>
+          <th>Gerenciar</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <script src="./script.js"></script>
+  </body>
+</html>

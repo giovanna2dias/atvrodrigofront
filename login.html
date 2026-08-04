@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <input type="text" id="nome">
+    <input type="text" id="senha">
+    <button type="button" id="enviar">Entrar</button>
+    <a href="./cadastro.html">Cadastrar</a>
+    <script>
+        const api = 'http://localhost:3000'
+        document.querySelector('#enviar').addEventListener('click',async ()=>{
+            const datas ={
+                 user: document.querySelector('#nome').value, 
+                 password : document.querySelector("#senha").value
+            };
+            const resposta = await fetch(`${api}/login`, {
+                method: 'POST',
+                headers : {'content-type':'application/json'},
+                body : JSON.stringify(datas)
+            })
+            resposta.status != 200? alert('usuário ou senha incorretos'):(
+            localStorage.setItem('nome', document.querySelector('#nome').value),
+            window.location.href='./index.html')
+        })
+    </script>
+</body>
+</html>
