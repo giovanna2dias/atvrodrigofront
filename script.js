@@ -10,6 +10,7 @@ const id_fabric = document.querySelector("#id_fabric");
 const corpo = document.querySelector("tbody");
 const api = "http://localhost:3000";
 const form = document.querySelector("form");
+const logout = document.querySelector("#logout");
 let prods = [];
 window.addEventListener("load", async () => {
   const resposta = await fetch(`${api}/produtos`);
@@ -67,6 +68,8 @@ form.addEventListener("submit", async (e) => {
   }
 });
 
+
+
 async function deletar(id) {
   const resposta = await fetch(`http://localhost:3000/deleta/${id}`, {
     method: "DELETE",
@@ -96,4 +99,20 @@ async function editar(id) {
     body: JSON.stringify(datas),
   });
   resposta.status == 201 ? window.location.reload() : alert("erro ao editar");
+} 
+
+logout.addEventListener("click", logoutUser);
+
+async function logoutUser() {
+  localStorage.removeItem("nome");
+  const resposta = await fetch(`${api}/logout`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+  });
+  if (resposta.status == 200) {
+    alert("Logout realizado com sucesso");
+  } else {
+    alert("Logout realizado");
+  }
+  window.location.href = "./login.html";
 }
