@@ -1,31 +1,114 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Login do professor</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            display: grid;
+            place-items: center;
+            padding: 24px;
+            background: #eef4f3;
+            color: #18302f;
+            font-family: Arial, sans-serif;
+        }
+
+        main {
+            width: min(100%, 380px);
+            padding: 32px;
+            background: #ffffff;
+            border: 1px solid #d7e4e1;
+            border-radius: 10px;
+            box-shadow: 0 12px 30px #18302f1a;
+        }
+
+        h1 {
+            margin: 0 0 8px;
+            font-size: 26px;
+        }
+
+        p {
+            margin: 0 0 24px;
+            color: #617371;
+        }
+
+        form {
+            display: grid;
+            gap: 16px;
+        }
+
+        label {
+            display: grid;
+            gap: 6px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #b9cbc8;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        input:focus {
+            outline: 2px solid #3a8f84;
+            border-color: #3a8f84;
+        }
+
+        button {
+            padding: 12px;
+            border: 0;
+            border-radius: 6px;
+            background: #236b63;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1a554f;
+        }
+
+        a {
+            display: block;
+            margin-top: 18px;
+            color: #236b63;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
-    <input type="text" id="nome">
-    <input type="text" id="senha">
-    <button type="button" id="enviar">Entrar</button>
-    <a href="./cadastro.html">Cadastrar</a>
-    <script>
-        const api = 'http://localhost:3000'
-        document.querySelector('#enviar').addEventListener('click',async ()=>{
-            const datas ={
-                 user: document.querySelector('#nome').value, 
-                 password : document.querySelector("#senha").value
-            };
-            const resposta = await fetch(`${api}/login`, {
-                method: 'POST',
-                headers : {'content-type':'application/json'},
-                body : JSON.stringify(datas)
-            })
-            resposta.status != 200? alert('usuário ou senha incorretos'):(
-            localStorage.setItem('nome', document.querySelector('#nome').value),
-            window.location.href='./index.html')
-        })
-    </script>
+    <main>
+        <h1>Login do professor</h1>
+        <p>Acesse sua conta para continuar.</p>
+
+        <form>
+            <label for="nome_prof">
+                Nome
+                <input type="text" id="nome_prof" placeholder="Digite seu nome" required>
+            </label>
+
+            <label for="senha_prof">
+                Senha
+                <input type="password" id="senha_prof" placeholder="Digite sua senha" required>
+            </label>
+
+            <button type="button" id="entrar">Entrar</button>
+        </form>
+
+        <a href="./cadastro.html">Cadastrar professor</a>
+    </main>
+
+    <script src="./script/login.js"></script>
 </body>
 </html>
