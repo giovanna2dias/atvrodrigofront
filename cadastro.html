@@ -1,18 +1,40 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>Cadastro do professor</title>
+    <link rel="stylesheet" href="./css/cadastro.css" />
   </head>
   <body>
-    <input type="text" id="nome" placeholder="nome" />
-    <input type="text" id="senha" placeholder="senha" />
-    <input type="text" id="Csenha" placeholder="confirmar senha" />
-    <button type="button" id="enviar">Cadastrar</button>
-    <a href="./login.html">tenho cadastro</a>
-    <script src="./scriptcad.js">
-    
-    </script>
+    <main>
+      <h1>Cadastro</h1>
+      <p>Crie sua conta de professor.</p>
+
+      <form>
+        <label for="nome_prof">
+          Nome
+          <input id="nome_prof" type="text" placeholder="Digite seu nome" />
+        </label>
+
+        <label for="senha_prof">
+          Senha
+          <input id="senha_prof" type="password" placeholder="Digite sua senha" />
+        </label>
+
+        <label for="confirmar_senha">
+          Confirmar senha
+          <input id="confirmar_senha" type="password" placeholder="Confirme sua senha" />
+        </label>
+
+        <button id="cadastrar" type="button">Cadastrar</button>
+      </form>
+
+      <div class="links">
+        <a href="./login.html">Já tenho cadastro</a>
+      </div>
+    </main>
+
+    <script src="./script/cadastro.js"></script>
   </body>
 </html>
