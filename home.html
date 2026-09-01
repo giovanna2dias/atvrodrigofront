@@ -9,7 +9,10 @@
   <body>
     <div class="page">
       <header class="topbar">
-        <h1>Área do professor</h1>
+        <div>
+          <h1>Área do professor</h1>
+          <p id="bemVindo">Olá prof.</p>
+        </div>
         <button id="logout" type="button">Sair</button>
       </header>
 
@@ -27,17 +30,14 @@
                 Nome do aluno
                 <input id="nomeAluno" type="text" placeholder="Digite o nome" required />
               </label>
-
               <label>
                 Senha
                 <input id="senhaAluno" type="password" placeholder="Digite a senha" required />
               </label>
-
               <label>
                 Telefone
                 <input id="telefoneAluno" type="tel" placeholder="Ex: (11) 99999-9999" />
               </label>
-
               <button class="primary-btn" type="submit">Adicionar aluno</button>
             </form>
           </div>
@@ -58,17 +58,14 @@
                   <option value="">Selecione o aluno</option>
                 </select>
               </label>
-
               <label>
                 Nome do treino
                 <input id="nomeTreino" type="text" list="listaNomesTreino" placeholder="Ex: Treino de força" required />
               </label>
-
               <label>
                 Tipo
                 <input id="tipoTreino" type="text" list="listaTiposTreino" placeholder="Ex: Hipertrofia, cardio, mobilidade" required />
               </label>
-
               <label>
                 Data
                 <input id="dataTreino" type="date" required />

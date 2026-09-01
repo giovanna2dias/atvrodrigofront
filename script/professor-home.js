@@ -7,35 +7,31 @@ const professor = professorRaw
     }
   : null;
 
-if (!professor || !professor.prof_id) {
-  window.location.href = "./login.html";
-}
+if (!professor || !professor.prof_id) window.location.href = "./login.html";
 
+const $ = (selector) => document.querySelector(selector);
 const storageTreinos = "professorTreinos";
-
-const formAluno = document.querySelector("#formAluno");
-const formTreino = document.querySelector("#formTreino");
-const listaAlunos = document.querySelector("#listaAlunos");
-const listaTreinos = document.querySelector("#listaTreinos");
-const treinoAlunoSelect = document.querySelector("#treinoAluno");
-const addExercicioButton = document.querySelector("#addExercicio");
-const exerciciosTreino = document.querySelector("#exerciciosTreino");
-const logoutButton = document.querySelector("#logout");
+const formAluno = $("#formAluno");
+const formTreino = $("#formTreino");
+const listaAlunos = $("#listaAlunos");
+const listaTreinos = $("#listaTreinos");
+const treinoAlunoSelect = $("#treinoAluno");
+const addExercicioButton = $("#addExercicio");
+const exerciciosTreino = $("#exerciciosTreino");
+const logoutButton = $("#logout");
 const tabButtons = document.querySelectorAll(".tab-button");
-const listaNomesTreino = document.querySelector("#listaNomesTreino");
-const listaTiposTreino = document.querySelector("#listaTiposTreino");
-const listaObservacoesTreino = document.querySelector("#listaObservacoesTreino");
-const listaExercicios = document.querySelector("#listaExercicios");
-const listaSeries = document.querySelector("#listaSeries");
-const listaObservacoesExercicio = document.querySelector("#listaObservacoesExercicio");
+const listaNomesTreino = $("#listaNomesTreino");
+const listaTiposTreino = $("#listaTiposTreino");
+const listaObservacoesTreino = $("#listaObservacoesTreino");
+const listaExercicios = $("#listaExercicios");
+const listaSeries = $("#listaSeries");
+const listaObservacoesExercicio = $("#listaObservacoesExercicio");
+const bemVindo = $("#bemVindo");
 
-function getTreinos() {
-  return JSON.parse(localStorage.getItem(storageTreinos) || "[]");
-}
+bemVindo.textContent = `Olá prof. ${professor?.nome_prof || "Professor"}`;
 
-function saveTreinos(treinos) {
-  localStorage.setItem(storageTreinos, JSON.stringify(treinos));
-}
+const getTreinos = () => JSON.parse(localStorage.getItem(storageTreinos) || "[]");
+const saveTreinos = (treinos) => localStorage.setItem(storageTreinos, JSON.stringify(treinos));
 
 async function carregarAlunos() {
   try {
@@ -44,28 +40,22 @@ async function carregarAlunos() {
       fetch(`${api}/professores`),
     ]);
 
-    if (!respostaAlunos.ok || !respostaProfessores.ok) {
-      throw new Error("Erro ao buscar alunos");
-    }
+    if (!respostaAlunos.ok || !respostaProfessores.ok) throw new Error("Erro ao buscar alunos");
 
     const alunos = await respostaAlunos.json();
     const professores = await respostaProfessores.json();
     const mapaProfessores = new Map(
-      professores.map((professorItem) => [Number(professorItem.prof_id), professorItem.nome_prof])
+      professores.map((p) => [Number(p.prof_id), p.nome_prof])
     );
 
     const options = alunos
       .map((aluno) => `<option value="${aluno.aluno_id}">${aluno.nome_alu}</option>`)
       .join("");
 
-    treinoAlunoSelect.innerHTML = `
-      <option value="">Selecione o aluno</option>
-      ${options}
-    `;
+    treinoAlunoSelect.innerHTML = `<option value="">Selecione o aluno</option>${options}`;
 
     if (!alunos.length) {
-      listaAlunos.innerHTML =
-        '<p class="empty-state">Nenhum aluno cadastrado ainda.</p>';
+      listaAlunos.innerHTML = '<p class="empty-state">Nenhum aluno cadastrado ainda.</p>';
       return;
     }
 
@@ -93,9 +83,8 @@ async function carregarAlunos() {
         `;
       })
       .join("");
-  } catch (error) {
-    listaAlunos.innerHTML =
-      '<p class="empty-state">Não foi possível carregar os alunos do banco.</p>';
+  } catch {
+    listaAlunos.innerHTML = '<p class="empty-state">Não foi possível carregar os alunos do banco.</p>';
     treinoAlunoSelect.innerHTML = '<option value="">Selecione o aluno</option>';
   }
 }
@@ -107,9 +96,7 @@ async function carregarOpcoesTreino() {
       fetch(`${api}/exercicios`),
     ]);
 
-    if (!treinosResposta.ok || !exerciciosResposta.ok) {
-      throw new Error("Erro ao buscar opções de treino");
-    }
+    if (!treinosResposta.ok || !exerciciosResposta.ok) throw new Error("Erro ao buscar opções de treino");
 
     const treinos = await treinosResposta.json();
     const exercicios = await exerciciosResposta.json();
@@ -127,7 +114,7 @@ async function carregarOpcoesTreino() {
     listaExercicios.innerHTML = nomesExercicios.map((valor) => `<option value="${valor}"></option>`).join("");
     listaSeries.innerHTML = seriesExercicios.map((valor) => `<option value="${valor}"></option>`).join("");
     listaObservacoesExercicio.innerHTML = observacoesExercicio.map((valor) => `<option value="${valor}"></option>`).join("");
-  } catch (error) {
+  } catch {
     listaNomesTreino.innerHTML = "";
     listaTiposTreino.innerHTML = "";
     listaObservacoesTreino.innerHTML = "";
@@ -141,39 +128,36 @@ function renderTreinos() {
   const treinos = getTreinos();
 
   if (!treinos.length) {
-    listaTreinos.innerHTML =
-      '<p class="empty-state">Nenhum treino cadastrado ainda.</p>';
+    listaTreinos.innerHTML = '<p class="empty-state">Nenhum treino cadastrado ainda.</p>';
     return;
   }
 
   listaTreinos.innerHTML = treinos
-    .map(
-      (treino) => {
-        const exercicios = treino.exercicios
-          .map(
-            (exercicio) => `
-              <li>
-                <strong>${exercicio.nome}</strong> — ${exercicio.series} séries,
-                ${exercicio.repeticoes} repetições,
-                ${exercicio.carga || "carga não informada"}
-                ${exercicio.observacao ? `- ${exercicio.observacao}` : ""}
-              </li>
-            `
-          )
-          .join("");
+    .map((treino) => {
+      const exercicios = treino.exercicios
+        .map(
+          (exercicio) => `
+            <li>
+              <strong>${exercicio.nome}</strong> — ${exercicio.series} séries,
+              ${exercicio.repeticoes} repetições,
+              ${exercicio.carga || "carga não informada"}
+              ${exercicio.observacao ? `- ${exercicio.observacao}` : ""}
+            </li>
+          `
+        )
+        .join("");
 
-        return `
-          <div class="item-card">
-            <h3>${treino.nome}</h3>
-            <p><strong>Aluno ID:</strong> ${treino.alunoId}</p>
-            <p><strong>Tipo:</strong> ${treino.tipo}</p>
-            <p><strong>Data:</strong> ${treino.data}</p>
-            <p><strong>Observações:</strong> ${treino.observacao || "Nenhuma"}</p>
-            <ul>${exercicios}</ul>
-          </div>
-        `;
-      }
-    )
+      return `
+        <div class="item-card">
+          <h3>${treino.nome}</h3>
+          <p><strong>Aluno ID:</strong> ${treino.alunoId}</p>
+          <p><strong>Tipo:</strong> ${treino.tipo}</p>
+          <p><strong>Data:</strong> ${treino.data}</p>
+          <p><strong>Observações:</strong> ${treino.observacao || "Nenhuma"}</p>
+          <ul>${exercicios}</ul>
+        </div>
+      `;
+    })
     .join("");
 }
 
@@ -206,10 +190,7 @@ function buildExerciseRow() {
     </label>
   `;
 
-  row.querySelector(".remove-exercise").addEventListener("click", () => {
-    row.remove();
-  });
-
+  row.querySelector(".remove-exercise").addEventListener("click", () => row.remove());
   return row;
 }
 
@@ -220,9 +201,9 @@ function adicionarLinhaExercicio() {
 formAluno.addEventListener("submit", async (event) => {
   event.preventDefault();
 
-  const nome = document.querySelector("#nomeAluno").value.trim();
-  const senha = document.querySelector("#senhaAluno").value.trim();
-  const telefone = document.querySelector("#telefoneAluno").value.trim();
+  const nome = $("#nomeAluno").value.trim();
+  const senha = $("#senhaAluno").value.trim();
+  const telefone = $("#telefoneAluno").value.trim();
 
   if (!nome || !senha) {
     alert("Informe o nome e a senha do aluno.");
@@ -232,9 +213,7 @@ formAluno.addEventListener("submit", async (event) => {
   try {
     const resposta = await fetch(`${api}/aluno`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         nome_alu: nome,
         senha_alu: senha,
@@ -243,14 +222,12 @@ formAluno.addEventListener("submit", async (event) => {
       }),
     });
 
-    if (!resposta.ok) {
-      throw new Error("Erro ao cadastrar aluno");
-    }
+    if (!resposta.ok) throw new Error("Erro ao cadastrar aluno");
 
     formAluno.reset();
     await carregarAlunos();
     alert("Aluno cadastrado com sucesso!");
-  } catch (error) {
+  } catch {
     alert("Não foi possível cadastrar o aluno.");
   }
 });
@@ -259,10 +236,10 @@ formTreino.addEventListener("submit", (event) => {
   event.preventDefault();
 
   const alunoId = Number(treinoAlunoSelect.value);
-  const nome = document.querySelector("#nomeTreino").value.trim();
-  const tipo = document.querySelector("#tipoTreino").value.trim();
-  const data = document.querySelector("#dataTreino").value;
-  const observacao = document.querySelector("#observacaoTreino").value.trim();
+  const nome = $("#nomeTreino").value.trim();
+  const tipo = $("#tipoTreino").value.trim();
+  const data = $("#dataTreino").value;
+  const observacao = $("#observacaoTreino").value.trim();
 
   if (!alunoId || !nome || !tipo || !data) {
     alert("Preencha todos os campos do treino.");
@@ -278,9 +255,7 @@ formTreino.addEventListener("submit", (event) => {
       const carga = row.querySelector('[name="cargaExercicio"]').value.trim();
       const obsExercicio = row.querySelector('[name="obsExercicio"]').value.trim();
 
-      if (!nomeExercicio || !series || !repeticoes) {
-        return null;
-      }
+      if (!nomeExercicio || !series || !repeticoes) return null;
 
       return {
         nome: nomeExercicio,
@@ -323,21 +298,15 @@ logoutButton.addEventListener("click", () => {
 for (const button of tabButtons) {
   button.addEventListener("click", () => {
     const target = button.dataset.tab;
-
-    document.querySelectorAll(".tab-button").forEach((item) => {
-      item.classList.toggle("active", item === button);
-    });
-
-    document.querySelectorAll(".tab-panel").forEach((panel) => {
-      panel.classList.toggle("active", panel.id === `${target}Tab`);
-    });
+    document.querySelectorAll(".tab-button").forEach((item) => item.classList.toggle("active", item === button));
+    document.querySelectorAll(".tab-panel").forEach((panel) => panel.classList.toggle("active", panel.id === `${target}Tab`));
   });
 }
 
 addExercicioButton.addEventListener("click", adicionarLinhaExercicio);
 
 async function inicializar() {
-  document.querySelector("#dataTreino").valueAsDate = new Date();
+  $("#dataTreino").valueAsDate = new Date();
   adicionarLinhaExercicio();
   await Promise.all([carregarAlunos(), carregarOpcoesTreino()]);
   renderTreinos();
