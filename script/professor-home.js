@@ -39,19 +39,20 @@ function saveTreinos(treinos) {
 
 async function carregarAlunos() {
   try {
-    const professorId = Number(professor.prof_id);
+    const [respostaAlunos, respostaProfessores] = await Promise.all([
+      fetch(`${api}/alunos`),
+      fetch(`${api}/professores`),
+    ]);
 
-    if (!professorId) {
-      throw new Error("Professor sem ID válido");
-    }
-
-    const resposta = await fetch(`${api}/alunos?prof_id=${professorId}`);
-
-    if (!resposta.ok) {
+    if (!respostaAlunos.ok || !respostaProfessores.ok) {
       throw new Error("Erro ao buscar alunos");
     }
 
-    const alunos = await resposta.json();
+    const alunos = await respostaAlunos.json();
+    const professores = await respostaProfessores.json();
+    const mapaProfessores = new Map(
+      professores.map((professorItem) => [Number(professorItem.prof_id), professorItem.nome_prof])
+    );
 
     const options = alunos
       .map((aluno) => `<option value="${aluno.aluno_id}">${aluno.nome_alu}</option>`)
@@ -69,14 +70,28 @@ async function carregarAlunos() {
     }
 
     listaAlunos.innerHTML = alunos
-      .map(
-        (aluno) => `
+      .map((aluno) => {
+        const professorNome =
+          aluno.nome_professor ||
+          aluno.professor_nome ||
+          mapaProfessores.get(Number(aluno.prof_id)) ||
+          "Professor não vinculado";
+
+        const ativo = aluno.ativo === true || aluno.ativo === "true" || aluno.ativo === 1;
+        const ultimoTreino = aluno.ultimo_treino
+          ? new Date(aluno.ultimo_treino).toLocaleDateString("pt-BR")
+          : "Sem treino registrado";
+
+        return `
           <div class="item-card">
             <h3>${aluno.nome_alu}</h3>
+            <p><strong>Professor:</strong> ${professorNome}</p>
             <p><strong>Telefone:</strong> ${aluno.tele_alu || "Não informado"}</p>
+            <p><strong>Status:</strong> <span style="color:${ativo ? "#1f8f5f" : "#b45b35"}; font-weight:700;">${ativo ? "Ativo" : "Inativo"}</span></p>
+            <p><strong>Último treino:</strong> ${ultimoTreino}</p>
           </div>
-        `
-      )
+        `;
+      })
       .join("");
   } catch (error) {
     listaAlunos.innerHTML =
