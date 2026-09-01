@@ -18,6 +18,11 @@ document.querySelector("#entrar").addEventListener("click", async () => {
   }
 
   const professor = await resposta.json();
-  localStorage.setItem("professor", JSON.stringify(professor));
+  const professorNormalizado = {
+    ...professor,
+    prof_id: professor.prof_id ?? professor.Prof_id ?? professor.profId,
+  };
+
+  localStorage.setItem("professor", JSON.stringify(professorNormalizado));
   window.location.href = "./home.html";
 });

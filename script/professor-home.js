@@ -1,7 +1,13 @@
 const api = "http://localhost:3000";
-const professor = JSON.parse(localStorage.getItem("professor"));
+const professorRaw = JSON.parse(localStorage.getItem("professor") || "null");
+const professor = professorRaw
+  ? {
+      ...professorRaw,
+      prof_id: professorRaw.prof_id ?? professorRaw.Prof_id ?? professorRaw.profId,
+    }
+  : null;
 
-if (!professor) {
+if (!professor || !professor.prof_id) {
   window.location.href = "./login.html";
 }
 
@@ -33,7 +39,13 @@ function saveTreinos(treinos) {
 
 async function carregarAlunos() {
   try {
-    const resposta = await fetch(`${api}/alunos?prof_id=${professor.prof_id}`);
+    const professorId = Number(professor.prof_id);
+
+    if (!professorId) {
+      throw new Error("Professor sem ID válido");
+    }
+
+    const resposta = await fetch(`${api}/alunos?prof_id=${professorId}`);
 
     if (!resposta.ok) {
       throw new Error("Erro ao buscar alunos");
