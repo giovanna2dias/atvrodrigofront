@@ -19,7 +19,24 @@ async function carregarTreinos() {
     const resposta = await fetch(`${api}/treinos?aluno_id=${aluno.aluno_id}`);
     if (!resposta.ok) throw new Error("Erro ao buscar treinos");
 
-    const treinos = await resposta.json();
+    const treinosBanco = await resposta.json();
+    const treinosLocais = JSON.parse(localStorage.getItem("professorTreinos") || "[]")
+      .filter((treino) => Number(treino.alunoId) === Number(aluno.aluno_id))
+      .map((treino) => ({
+        treino_id: treino.treino_id || treino.id,
+        local: !treino.treino_id,
+        nome_trei: treino.nome_trei || treino.nome,
+        tipo_trei: treino.tipo_trei || treino.tipo,
+        data_trei: treino.data_trei || treino.data,
+        observ_trei: treino.observ_trei || treino.observacao,
+        finalizado: treino.finalizado || false,
+      }));
+
+    const idsDoBanco = new Set(treinosBanco.map((treino) => String(treino.treino_id)));
+    const treinos = [
+      ...treinosBanco,
+      ...treinosLocais.filter((treino) => !idsDoBanco.has(String(treino.treino_id))),
+    ];
 
     if (!treinos.length) {
       listaTreinos.innerHTML = '<p class="empty">Nenhum treino cadastrado para você.</p>';
@@ -49,12 +66,34 @@ async function carregarTreinos() {
 
         if (!treinoAtual) return;
 
-        treinoAtual.finalizado = true;
-        botao.textContent = "Finalizado";
-        botao.disabled = true;
-        botao.closest(".treino").classList.add("finalizado");
+        try {
+          const treinoDoBanco =
+            !treinoAtual.local && Number.isInteger(treinoId) && treinoId <= 2147483647;
 
-        alert("Treino marcado como finalizado!");
+          if (treinoDoBanco) {
+            const resposta = await fetch(`${api}/treino/${treinoId}/finalizar`, {
+              method: "PATCH",
+            });
+
+            if (!resposta.ok) throw new Error("Erro ao finalizar treino");
+          }
+
+          treinoAtual.finalizado = true;
+          const treinosLocais = JSON.parse(localStorage.getItem("professorTreinos") || "[]");
+          const treinoLocal = treinosLocais.find(
+            (item) => String(item.id) === String(treinoId)
+          );
+          if (treinoLocal) {
+            treinoLocal.finalizado = true;
+            localStorage.setItem("professorTreinos", JSON.stringify(treinosLocais));
+          }
+          botao.textContent = "Finalizado";
+          botao.disabled = true;
+          botao.closest(".treino").classList.add("finalizado");
+          alert("Treino marcado como finalizado!");
+        } catch {
+          alert("Não foi possível finalizar o treino.");
+        }
       });
     });
   } catch {

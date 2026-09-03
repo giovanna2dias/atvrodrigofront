@@ -67,7 +67,8 @@ async function carregarAlunos() {
           mapaProfessores.get(Number(aluno.prof_id)) ||
           "Professor não vinculado";
 
-        const ativo = aluno.ativo === true || aluno.ativo === "true" || aluno.ativo === 1;
+        const status = aluno.status_treino || (aluno.ativo ? "Ativo" : "Inativo");
+        const statusCor = status === "Ativo" ? "#1f8f5f" : status === "Sem treinos" ? "#777" : "#b45b35";
         const ultimoTreino = aluno.ultimo_treino
           ? new Date(aluno.ultimo_treino).toLocaleDateString("pt-BR")
           : "Sem treino registrado";
@@ -77,7 +78,7 @@ async function carregarAlunos() {
             <h3>${aluno.nome_alu}</h3>
             <p><strong>Professor:</strong> ${professorNome}</p>
             <p><strong>Telefone:</strong> ${aluno.tele_alu || "Não informado"}</p>
-            <p><strong>Status:</strong> <span style="color:${ativo ? "#1f8f5f" : "#b45b35"}; font-weight:700;">${ativo ? "Ativo" : "Inativo"}</span></p>
+            <p><strong>Status:</strong> <span style="color:${statusCor}; font-weight:700;">${status}</span></p>
             <p><strong>Último treino:</strong> ${ultimoTreino}</p>
           </div>
         `;
@@ -134,6 +135,10 @@ function renderTreinos() {
 
   listaTreinos.innerHTML = treinos
     .map((treino) => {
+      const aluno = [...treinoAlunoSelect.options].find(
+        (option) => Number(option.value) === Number(treino.alunoId)
+      );
+      const alunoNome = aluno?.textContent || treino.alunoNome || "Aluno não encontrado";
       const exercicios = treino.exercicios
         .map(
           (exercicio) => `
@@ -150,7 +155,7 @@ function renderTreinos() {
       return `
         <div class="item-card">
           <h3>${treino.nome}</h3>
-          <p><strong>Aluno ID:</strong> ${treino.alunoId}</p>
+          <p><strong>Aluno:</strong> ${alunoNome}</p>
           <p><strong>Tipo:</strong> ${treino.tipo}</p>
           <p><strong>Data:</strong> ${treino.data}</p>
           <p><strong>Observações:</strong> ${treino.observacao || "Nenhuma"}</p>
@@ -232,7 +237,7 @@ formAluno.addEventListener("submit", async (event) => {
   }
 });
 
-formTreino.addEventListener("submit", (event) => {
+formTreino.addEventListener("submit", async (event) => {
   event.preventDefault();
 
   const alunoId = Number(treinoAlunoSelect.value);
@@ -272,22 +277,61 @@ formTreino.addEventListener("submit", (event) => {
     return;
   }
 
-  const treinos = getTreinos();
-  treinos.push({
-    id: Date.now(),
-    alunoId,
-    nome,
-    tipo,
-    data,
-    observacao,
-    exercicios,
-  });
+  try {
+    const exerciciosCriados = await Promise.all(
+      exercicios.map((exercicio) =>
+        fetch(`${api}/exercicio`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            nome_exer: exercicio.nome,
+            serie_exer: exercicio.series,
+            observ_exer: exercicio.observacao,
+          }),
+        }).then(async (resposta) => {
+          if (!resposta.ok) throw new Error("Erro ao cadastrar exercício");
+          return resposta.json();
+        })
+      )
+    );
 
-  saveTreinos(treinos);
-  formTreino.reset();
-  exerciciosTreino.innerHTML = "";
-  adicionarLinhaExercicio();
-  renderTreinos();
+    const resposta = await fetch(`${api}/treino`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        nome_trei: nome,
+        tipo_trei: tipo,
+        data_trei: data,
+        observ_trei: observacao,
+        aluno_id: alunoId,
+        prof_id: professor.prof_id,
+        exer_id: exerciciosCriados[0]?.exer_id || null,
+      }),
+    });
+
+    if (!resposta.ok) throw new Error("Erro ao cadastrar treino");
+
+    const treinoSalvo = await resposta.json();
+    const treinos = getTreinos();
+    treinos.push({
+      ...treinoSalvo,
+      id: treinoSalvo.treino_id,
+      alunoId,
+      nome,
+      tipo,
+      data,
+      observacao,
+      exercicios,
+    });
+    saveTreinos(treinos);
+    formTreino.reset();
+    exerciciosTreino.innerHTML = "";
+    adicionarLinhaExercicio();
+    renderTreinos();
+    alert("Treino cadastrado com sucesso!");
+  } catch {
+    alert("Não foi possível cadastrar o treino.");
+  }
 });
 
 logoutButton.addEventListener("click", () => {
